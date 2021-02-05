@@ -1,16 +1,16 @@
-% TWCF FG stimuli test 
-% Febraury 4 2021 
+% TWCF figure ground stimuli
+% Lamme 
+% Febraury 2021 
 % Karen Tian
 
 saveFig = 1; 
 
 %% params 
 sizeIm = [1000 1000]; 
-lineLength = 50; 
+lineLength = 100; 
 lineWidth = 2; 
 slopeAngle = 0; % or random 
-contrast = .1; % proportion black
-density = ((sizeIm(1)*sizeIm(2))/(lineLength*lineWidth)) * contrast; % how many lines 
+density = 1000; % how many lines 
 figRad = 300; % figure aperture size
 apertureType = 'square'; % 'grating'
 
@@ -75,8 +75,8 @@ bg(~logical(grating)) = 1;
 % combine
 FGIm2 = imfuse(bg,fig,'blend');
 FGIm2 = double(FGIm2); 
-% FGIm2(FGIm2==255) = 1;
-% FGIm2(FGIm2==128) = 0;
+FGIm2(FGIm2==255) = 1;
+FGIm2(FGIm2==128) = 0;
 
 %% combined image 
 % FGIm = bg; 
