@@ -1,5 +1,8 @@
-% TWCF FG stimuli test 
-% Febraury 4 2021 
+function [imout, ap] = twcf_makeFGStim(im, type, rad, w, af)
+
+% TWCF figure ground stimuli
+% Lamme 
+% Febraury 2021 
 % Karen Tian
 
 saveFig = 1; 
@@ -9,8 +12,7 @@ sizeIm = [1000 1000];
 lineLength = 100; 
 lineWidth = 2; 
 slopeAngle = 0; % or random 
-contrast = .3; % proportion black 
-density = (sizeIm(1)*sizeIm(2) * contrast)/lineLength; % how many lines 
+density = 1000; % how many lines 
 figRad = 300; % figure aperture size
 apertureType = 'square'; % 'grating'
 

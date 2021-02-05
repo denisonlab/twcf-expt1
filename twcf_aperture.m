@@ -1,19 +1,28 @@
-function [imout, ap] = rd_aperture(im, type, rad, w, af)
+function [imout, ap] = twcf_aperture(im, type, rad, w, af)
 
-% function [imout, ap] = rd_aperture(im, type, rad, w, af)
+% [imout, ap] = TWCF_APERTURE(im, type, rad, w, af)
+%   applies aperture to image
 %
-% type is the type of aperture:
-%   'square','gaussian','cosine','cosine-ring','radial-sine','radial-sine-ring','vignette-ring'
-%
-% rad is the radius of the aperture opening 
-%   for 'gaussian', sigma = rad
-%   for 'cosine-ring' aperture, rad = [outer inner]
-%
-% w is the width of the aperture edge ('cosine*','radial*')
-%   frequency of sine wave = 1/(2*w)
-%   for 'radial*', also controls the spatial frequency
-%
-% af is the angular frequency, for 'vignette' only
+% INPUTS
+%   im
+%       image matrix 
+%   type is the type of aperture:
+%       'square','gaussian','cosine','cosine-ring','radial-sine','radial-sine-ring','vignette-ring'
+%   rad is the radius of the aperture opening 
+%       for 'gaussian', sigma = rad
+%       for 'cosine-ring' aperture, rad = [outer inner]
+%   w is the width of the aperture edge ('cosine*','radial*')
+%       frequency of sine wave = 1/(2*w)
+%       for 'radial*', also controls the spatial frequency
+%   af is the angular frequency, for 'vignette' only
+% 
+% OUTPUTS 
+%   imout 
+%       image with aperture matrix 
+%   ap 
+%       aperture matrix 
+% 
+% adapted from Rachel Denison, rd_aperture 
 
 %% Check inputs
 if any(strfind(type, 'ring'))
