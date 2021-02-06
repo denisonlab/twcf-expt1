@@ -16,7 +16,7 @@ lineAngle = [15 45]; % angle (degrees) of texture lines, scalar or vector
 imContrast = .1; % proportion of image covered by line 
 
 % figure 
-figRad = 300; % figure aperture size, to still EDIT check how twcf_aperture takes in sizing 
+figRad = 300; % figure aperture size
 apertureType = 'square'; %  determines figure shape 
 figGrating = 0; % logical 
 
@@ -68,6 +68,9 @@ imshow(bg)
 figSlope = slope-pi/2; % fig lines orthogonal to bg lines 
 % figX = randi([1-lineLength,sizeIm(1)+lineLength],1,nLines); 
 % figY = randi([1-lineLength,sizeIm(2)+lineLength],1,nLines); 
+figure
+imshow(im) 
+hold on 
 fig = im; 
 for i = 1:nLines
     lineSlope = figSlope(randsample(numel(lineAngle),1))*lineLength;
@@ -91,19 +94,21 @@ end
 
 %% combine fig + ground 
 if figGrating
-    fgIm = imfuse(bg,fig,'blend');
-    fgIm = double(fgIm)/255; 
-    fgIm(~logical(ap)) = 1; 
-else
-    fgIm = bg; 
-    fgIm(logical(ap)) = figAp(logical(ap)); 
-end
+FGIm2 = imfuse(bg,fig,'blend');
+FGIm2 = double(FGIm2); 
+FGIm2(FGIm2==255) = 1;
+FGIm2(FGIm2==128) = 0;
+
+%% combined image 
+% FGIm = bg; 
+FGIm = ones(size(FGIm2)); 
+FGIm(logical(ap)) = FGIm2(logical(ap)); 
 
 %% show final image 
 figure
-imshow(fgIm)
+imshow(FGIm)
 titleText = sprintf('FG_lineLength%d_density%d_gratingAngle%d',lineLength,nLines,tiltDegrees); 
 title(sprintf('line length: %d; density: %d; line angle: %d, grating angle: %d',lineLength,nLines,lineAngle,tiltDegrees))
 if saveFig 
-    print(gcf,'-dpng','-painters',sprintf('%s/figs/%s.png',pwd,titleText))
+    print(gcf,'-dpng','-painters',sprintf('/figs/%s.png',titleText))
 end
