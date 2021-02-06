@@ -1,11 +1,8 @@
 <h1>twcf-expt1: subjective inflation</h1>
 
-Generating texture-defined figure ground stimuli, in which figure strength is parametrically controlled using texture line length (Nothdurft, 1985; Supèr et al., 2001).
+Generating texture-defined figure ground stimuli. Figure strength is parametrically controlled using texture line length (Nothdurft, 1985; Supèr et al., 2001).
 
-Figures are generated in the main script `twcf_makeFGStim.m`
- 
- ![FG stimuli sample](figs/fgStimSample.png)
-
+Figures are generated in the main script `twcf_makeFGStim.m`, in which the following stimuli parameters can be manipulated. 
 ```matlab 
 % ground 
 pixelsPerDegree = 99; 
@@ -26,3 +23,9 @@ tiltDegrees = 30;
 phase = 0;
 contrast = 1;
 ```
+
+Sample stimuli
+![FG stimuli sample](figs/fgStimSample.jpg)
+
+Sample grating stimuli
+![FG stimuli sample grating](figs/fgStimSampleGrating.jpg)
