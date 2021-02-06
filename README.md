@@ -1,20 +1,28 @@
 <h1>twcf-expt1: subjective inflation</h1>
 
-<p>Generating texture-defined figure ground stimuli, in which figure strength is parametrically controlled using texture line length (Nothdurft, 1985; Supèr et al., 2001).</p>
- 
-```matlab 
-    sizeIm = [1000 1000]; 
-    lineLength = 100; 
-    lineWidth = 2; 
-    slopeAngle = 0; % or random 
-    density = 1000; % how many lines 
-    figRad = 300; % figure aperture size
-    apertureType = 'square'; % 'grating'
+Generating texture-defined figure ground stimuli, in which figure strength is parametrically controlled using texture line length (Nothdurft, 1985; Supèr et al., 2001).
 
-    % if grating figure, params: 
-    pixelsPerDegree = 99; 
-    spatialFrequency = 0.5; 
-    tiltDegrees = 45;
-    phase = 0;
-    contrast = 1;
+Figures are generated in the main script `twcf_makeFGStim.m`
+ 
+ ![FG stimuli sample](figs/fgStimSample.png)
+
+```matlab 
+% ground 
+pixelsPerDegree = 99; 
+sizeIm = [600 1000]; % size of image 
+lineLength = 100; % length of texture lines
+lineWidth = 1; % width of texture lines
+lineAngle = [45]; % angle (degrees) of texture lines, scalar or vector 
+imContrast = .1; % proportion of image covered by line 
+
+% figure 
+figRad = 260; % figure aperture size
+apertureType = 'square'; %  determines figure shape 
+figGrating = 1; % logical for "grating" figure 
+
+% grating params 
+spatialFrequency = 0.5; 
+tiltDegrees = 30;
+phase = 0;
+contrast = 1;
 ```

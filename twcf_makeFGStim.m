@@ -12,23 +12,24 @@ pixelsPerDegree = 99;
 sizeIm = [600 1000]; % size of image 
 lineLength = 100; % length of texture lines
 lineWidth = 1; % width of texture lines
-lineAngle = [15 45]; % angle (degrees) of texture lines, scalar or vector 
+lineAngle = [45]; % angle (degrees) of texture lines, scalar or vector 
 imContrast = .1; % proportion of image covered by line 
 
 % figure 
-figRad = 300; % figure aperture size, to still EDIT check how twcf_aperture takes in sizing 
+figRad = 260; % figure aperture size, to still EDIT check how twcf_aperture takes in sizing 
 apertureType = 'square'; %  determines figure shape 
-figGrating = 0; % logical 
+figGrating = 1; % logical for "grating" figure 
 
+% grating params 
 spatialFrequency = 0.5; 
-tiltDegrees = 45;
+tiltDegrees = 30;
 phase = 0;
 contrast = 1;
 
 %% setup 
 im = ones(sizeIm); % blank im 
 sizeDegrees = max(size(im))/pixelsPerDegree; % side length in degrees of visual angle
-nLines = ((sizeIm(1)*sizeIm(2))/(lineLength*lineWidth)) * imContrast; % number of lines to draw
+nLines = round(((sizeIm(1)*sizeIm(2))/(lineLength*lineWidth)) * imContrast); % number of lines to draw
 slope = tan(deg2rad(lineAngle)); % angle to rise/run 
 
 %% draw bg lines 
@@ -52,7 +53,7 @@ randY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines);
 % bg = squeeze(double(bg(:,:,1))); 
 
 % try insert shape method
-% works but seems slow 
+% works but slow.. edit to non loop 
 bg = im; 
 for i = 1:nLines
     lineSlope = slope(randsample(numel(lineAngle),1))*lineLength;
@@ -61,8 +62,8 @@ for i = 1:nLines
     bg = insertShape(bg,'Line',[x(1) y(1) x(2) y(2)],'LineWidth',lineWidth,'Color','black');
 end
 bg = squeeze(double(bg(:,:,1))); 
-figure
-imshow(bg)
+% figure
+% imshow(bg)
 
 %% draw fig lines 
 figSlope = slope-pi/2; % fig lines orthogonal to bg lines 
@@ -76,8 +77,8 @@ for i = 1:nLines
     fig = insertShape(fig,'Line',[x(1) y(1) x(2) y(2)],'LineWidth',lineWidth,'Color','black');
 end
 fig = squeeze(double(fig(:,:,1))); 
-figure
-imshow(fig)
+% figure
+% imshow(fig)
 
 %% aperture fig 
 if figGrating
@@ -103,7 +104,8 @@ end
 figure
 imshow(fgIm)
 titleText = sprintf('FG_lineLength%d_density%d_gratingAngle%d',lineLength,nLines,tiltDegrees); 
-title(sprintf('line length: %d; density: %d; line angle: %d, grating angle: %d',lineLength,nLines,lineAngle,tiltDegrees))
+title(sprintf('line length: %d; nLines: %d; line angle: %d, grating angle: %d',lineLength,nLines,lineAngle,tiltDegrees),...
+    'FontSize', 14)
 if saveFig 
     print(gcf,'-dpng','-painters',sprintf('%s/figs/%s.png',pwd,titleText))
 end
