@@ -2,7 +2,7 @@
 
 Generating texture-defined figure ground stimuli. Figure strength is parametrically controlled using texture line length (Nothdurft, 1985; Supèr et al., 2001).
 
-Figures are generated in the main script `twcf_makeFGStim.m`, in which the following stimuli parameters can be manipulated. 
+Figures are generated in the `twcf_makeFGStim.m`, in which the following stimuli parameters can be manipulated. 
 ```matlab 
 % ground 
 pixelsPerDegree = 99; 

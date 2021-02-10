@@ -10,14 +10,14 @@ saveFig = 1; % save fig to directory
 % ground 
 pixelsPerDegree = 99; 
 sizeIm = [600 1000]; % size of image 
-lineLength = 100; % length of texture lines
-lineWidth = 1; % width of texture lines
-lineAngle = [45]; % angle (degrees) of texture lines, scalar or vector 
-imContrast = .1; % proportion of image covered by line 
+lineLength = 50; % length of texture lines
+lineWidth = 2; % width of texture lines
+lineAngle = 60; % angle (degrees) of texture lines, scalar 
+imContrast = .3; % proportion of image covered by line 
 
 % figure 
-figRad = 260; % figure aperture size, to still EDIT check how twcf_aperture takes in sizing 
-apertureType = 'square'; %  determines figure shape 
+figRad = 260; % figure aperture size (radius) 
+apertureType = 'square'; %  determines circular figure aperture edge type % EDIT to make other shapes 
 figGrating = 1; % logical for "grating" figure 
 
 % grating params 
@@ -30,11 +30,15 @@ contrast = 1;
 im = ones(sizeIm); % blank im 
 sizeDegrees = max(size(im))/pixelsPerDegree; % side length in degrees of visual angle
 nLines = round(((sizeIm(1)*sizeIm(2))/(lineLength*lineWidth)) * imContrast); % number of lines to draw
-slope = tan(deg2rad(lineAngle)); % angle to rise/run 
+if lineAngle == 90 
+    slope = 1; 
+else
+    slope = tan(deg2rad(lineAngle)); % angle to rise/run 
+end
 
 %% draw bg lines 
-randX = randi([1-lineLength/2,sizeIm(2)+lineLength/2],1,nLines); % randomly generate line middle points 
-randY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines); 
+randX = randi([1-lineLength/2,sizeIm(2)+lineLength/2],1,nLines)'; % randomly generate line middle points 
+randY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines)'; 
 
 % lines plotted on im 
 % is there better way to do this.. why do dimenions change..alternatively, manipulate im directly
@@ -62,8 +66,22 @@ for i = 1:nLines
     bg = insertShape(bg,'Line',[x(1) y(1) x(2) y(2)],'LineWidth',lineWidth,'Color','black');
 end
 bg = squeeze(double(bg(:,:,1))); 
-% figure
-% imshow(bg)
+
+bg = im; 
+lineSlope = slope(randsample(numel(lineAngle),1))*lineLength;
+
+if lineAngle == 90
+    x = cat(2, randX, randX); 
+else
+    x = cat(2, randX-lineLength/2, randX+lineLength/2); 
+end
+y = cat(2, randY-lineSlope/2, randY+lineSlope/2); 
+
+bg = insertShape(bg,'Line',[x(:,1) y(:,1) x(:,2) y(:,2)],'LineWidth',lineWidth,'Color','black');
+
+bg = squeeze(double(bg(:,:,1))); 
+figure
+imshow(bg)
 
 %% draw fig lines 
 figSlope = slope-pi/2; % fig lines orthogonal to bg lines 
