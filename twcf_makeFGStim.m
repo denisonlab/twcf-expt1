@@ -1,12 +1,16 @@
-function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast)
+function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast,isFig)
 
 % function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast)
 % 
 % Generates figure ground stimuli (Lamme) for TWCF expt 1. 
 % 
 % INPUTS
-%   lineLength (default 100). Length of texture lines. Longer lines lead to
-%   stronger subjective figure percept. 
+%   lineLength (default 100)
+%   lineAngle (angle degrees of bg lines) 
+%   figTilt (angle degrees of square tilt) 
+%   imContrast (overall image contrast [0 to 1]
+%   isFig (1=figure+, 0=figure-)
+% 
 % OUTPUTS 
 %   fgIm: figure ground image matrix 
 %
@@ -14,7 +18,7 @@ function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast)
 % Karen Tian
 
 %% params 
-saveFig = 1; % save fig to directory 
+saveFig = 0; % save fig to directory 
 
 % ground 
 pixelsPerDegree = 99; 
@@ -30,11 +34,11 @@ sizeFig = [600 600]; % square image size
 % contrast = 1;
 % tiltDegrees = 30;
 % figRad = 260; % figure aperture size (radius) 
-apertureEdgeType = 'square'; %  determines aperture edge, square, cosyne, etc 
+apertureEdgeType = 'square'; %  determines aperture edge, square=hard edge 
 % figGrating = 1; % logical for "grating" figure 
-isFig = 0; 
 
 %% checks 
+% default inputs 
 if nargin==0
     lineLength = 60; % length of texture lines
 elseif nargin<1
@@ -43,6 +47,8 @@ elseif nargin<2
     figTilt = 10; % tilt (degrees) for figure 
 elseif nargin<3
     imContrast = .15; % proportion of image covered by line 
+elseif nargin<4
+    isFig = 1; % 1=figure+, 0=figure-
 end
 if max(sizeFig) > min(sizeIm) 
     error('figure size must be less than image size')
@@ -73,7 +79,6 @@ randX = randi([1-lineLength/2,sizeIm(2)+lineLength/2],1,nLines)'; % randomly gen
 randY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines)'; 
 
 % randX = randperm(sizeIm(2),nLines); 
-
 if bgSlope == 1
     x = cat(2, randX, randX); 
 else
