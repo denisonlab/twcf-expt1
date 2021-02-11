@@ -1,6 +1,15 @@
-function twcf_makeFGStim
+function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast)
 
-% TWCF figure ground stimuli (Lamme) 
+% function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast)
+% 
+% Generates figure ground stimuli (Lamme) for TWCF expt 1. 
+% 
+% INPUTS
+%   lineLength (default 100). Length of texture lines. Longer lines lead to
+%   stronger subjective figure percept. 
+% OUTPUTS 
+%   fgIm: figure ground image matrix 
+%
 % Febraury 2021 
 % Karen Tian
 
@@ -9,121 +18,155 @@ saveFig = 1; % save fig to directory
 
 % ground 
 pixelsPerDegree = 99; 
-sizeIm = [600 1000]; % size of image 
-lineLength = 50; % length of texture lines
-lineWidth = 2; % width of texture lines
-lineAngle = 60; % angle (degrees) of texture lines, scalar 
-imContrast = .3; % proportion of image covered by line 
+sizeIm = [1000 1000]; % size of image 
+lineWidth = 1; % width of texture lines, check this seems to act weird for non 45 degree lines.. 
 
 % figure 
-figRad = 260; % figure aperture size (radius) 
-apertureType = 'square'; %  determines circular figure aperture edge type % EDIT to make other shapes 
-figGrating = 1; % logical for "grating" figure 
+sizeFig = [600 600]; % square image size 
 
 % grating params 
-spatialFrequency = 0.5; 
-tiltDegrees = 30;
-phase = 0;
-contrast = 1;
+% spatialFrequency = 0.5; 
+% phase = 0;
+% contrast = 1;
+% tiltDegrees = 30;
+% figRad = 260; % figure aperture size (radius) 
+apertureEdgeType = 'square'; %  determines aperture edge, square, cosyne, etc 
+% figGrating = 1; % logical for "grating" figure 
+isFig = 0; 
+
+%% checks 
+if nargin==0
+    lineLength = 60; % length of texture lines
+elseif nargin<1
+    lineAngle = 45; % angle (degrees) of texture lines, scalar 
+elseif nargin<2
+    figTilt = 10; % tilt (degrees) for figure 
+elseif nargin<3
+    imContrast = .15; % proportion of image covered by line 
+end
+if max(sizeFig) > min(sizeIm) 
+    error('figure size must be less than image size')
+end
 
 %% setup 
-im = ones(sizeIm); % blank im 
+im = ones(sizeIm); % blank image
 sizeDegrees = max(size(im))/pixelsPerDegree; % side length in degrees of visual angle
-nLines = round(((sizeIm(1)*sizeIm(2))/(lineLength*lineWidth)) * imContrast); % number of lines to draw
+areaIm = sizeIm(1)*sizeIm(2); 
+blackPerLine = lineLength*lineWidth; 
+totalBlack = areaIm*imContrast; 
+nLines = round(totalBlack/blackPerLine); 
+% nLines = round(((sizeIm(1)*sizeIm(2))/(lineLength*lineWidth)) * imContrast); % number of lines to draw
 if lineAngle == 90 
-    slope = 1; 
+    bgSlope = 1;
+    figSlope = 0; 
+elseif lineAngle == 0 
+    bgSlope = 0; 
+    figSlope = 1; 
 else
-    slope = tan(deg2rad(lineAngle)); % angle to rise/run 
+    bgSlope = tan(deg2rad(lineAngle)); % angle to rise/run 
+    figSlope = tan(deg2rad(lineAngle)+pi/2); 
 end
+figTiltRad = deg2rad(figTilt);
 
 %% draw bg lines 
 randX = randi([1-lineLength/2,sizeIm(2)+lineLength/2],1,nLines)'; % randomly generate line middle points 
 randY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines)'; 
 
-% lines plotted on im 
-% is there better way to do this.. why do dimenions change..alternatively, manipulate im directly
-% figure
-% imshow(im) 
-% hold on 
-% for i = 1:nLines
-%     lineSlope = slope(randsample(numel(lineAngle),1))*lineLength;
-%     x = [randX(i)-lineLength/2, randX(i)+lineLength/2]; 
-%     y = [randY(i)-lineSlope/2, randY(i)+lineSlope/2];
-%     plot(x,y,'LineWidth',lineWidth,'Color','k')
-% end
-% F = getframe(gcf); 
-% bg = frame2im(F);
-% bg(bg~=0) = 1; 
-% bg = squeeze(double(bg(:,:,1))); 
+% randX = randperm(sizeIm(2),nLines); 
 
-% try insert shape method
-% works but slow.. edit to non loop 
-bg = im; 
-for i = 1:nLines
-    lineSlope = slope(randsample(numel(lineAngle),1))*lineLength;
-    x = [randX(i)-lineLength/2, randX(i)+lineLength/2]; 
-    y = [randY(i)-lineSlope/2, randY(i)+lineSlope/2];
-    bg = insertShape(bg,'Line',[x(1) y(1) x(2) y(2)],'LineWidth',lineWidth,'Color','black');
-end
-bg = squeeze(double(bg(:,:,1))); 
-
-bg = im; 
-lineSlope = slope(randsample(numel(lineAngle),1))*lineLength;
-
-if lineAngle == 90
+if bgSlope == 1
     x = cat(2, randX, randX); 
 else
     x = cat(2, randX-lineLength/2, randX+lineLength/2); 
 end
-y = cat(2, randY-lineSlope/2, randY+lineSlope/2); 
+y = cat(2, randY+bgSlope*lineLength/2, randY-bgSlope*lineLength/2); 
 
-bg = insertShape(bg,'Line',[x(:,1) y(:,1) x(:,2) y(:,2)],'LineWidth',lineWidth,'Color','black');
+bg = im; 
+bg = insertShape(im,'Line',[x(:,1) y(:,1) x(:,2) y(:,2)],'LineWidth',lineWidth,'Color','black','Opacity',1);
+bg = rgb2gray(bg); 
+bg(bg~=1) = 0; 
+% bg(bg>=0.5) = 1; 
+% figure
+% imshow(bg)
 
-bg = squeeze(double(bg(:,:,1))); 
-figure
-imshow(bg)
-
+if isFig == 0 
+    fgIm = bg; 
+else
 %% draw fig lines 
-figSlope = slope-pi/2; % fig lines orthogonal to bg lines 
-% figX = randi([1-lineLength,sizeIm(1)+lineLength],1,nLines); 
-% figY = randi([1-lineLength,sizeIm(2)+lineLength],1,nLines); 
-fig = im; 
-for i = 1:nLines
-    lineSlope = figSlope(randsample(numel(lineAngle),1))*lineLength;
-    x = [randX(i)-lineLength/2, randX(i)+lineLength/2]; % using same midpoints as bg, but could also regenerate randomly
-    y = [randY(i)-lineSlope/2, randY(i)+lineSlope/2];
-    fig = insertShape(fig,'Line',[x(1) y(1) x(2) y(2)],'LineWidth',lineWidth,'Color','black');
+figX = randi([1-lineLength/2,sizeIm(2)+lineLength/2],1,nLines)';
+figY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines)'; 
+if figSlope == 1
+    x = cat(2, figX, figX); 
+else
+    x = cat(2, figX-lineLength/2, figX+lineLength/2); 
 end
-fig = squeeze(double(fig(:,:,1))); 
+y = cat(2, figY+figSlope*lineLength/2, figY-figSlope*lineLength/2); 
+
+fig = insertShape(im,'Line',[x(:,1) y(:,1) x(:,2) y(:,2)],'LineWidth',lineWidth,'Color','black','Opacity',1);
+fig = rgb2gray(fig); 
+fig(fig~=1) = 0; 
+% fig(fig<0.5) = 0; 
+% fig(fig>=0.5) = 1; 
 % figure
 % imshow(fig)
 
 %% aperture fig 
-if figGrating
-    grating = rd_grating(pixelsPerDegree, sizeDegrees, spatialFrequency, tiltDegrees, phase, contrast);
-    grating(grating>.5) = 1; grating(grating<=.5) = 0; % hard edge
-    grating = grating(1:size(im,1),1:size(im,2));
-    fig(logical(grating)) = 1;
-    bg(~logical(grating)) = 1;
-end
-[figAp, ap] = twcf_aperture(fig, apertureType, figRad, 0); % cutout figure shape 
+% if figGrating
+%     grating = rd_grating(pixelsPerDegree, sizeDegrees, spatialFrequency, tiltDegrees, phase, contrast);
+%     grating(grating>.5) = 1; grating(grating<=.5) = 0; % hard edge
+%     grating = grating(1:size(im,1),1:size(im,2));
+%     fig(logical(grating)) = 1;
+%     bg(~logical(grating)) = 1;
+% end
+% [figAp, ap] = twcf_aperture(fig, apertureEdgeType, figRad, 0); % cutout figure shape 
+
+%% draw figure aperture 
+figCoord = [sizeIm(2)/2+sizeFig(2)/2, sizeIm(1)/2-sizeFig(1)/2,...
+    sizeIm(2)/2+sizeFig(2)/2, sizeIm(1)/2+sizeFig(1)/2,...
+    sizeIm(2)/2-sizeFig(2)/2, sizeIm(1)/2+sizeFig(1)/2,...
+    sizeIm(2)/2-sizeFig(2)/2, sizeIm(1)/2-sizeFig(1)/2]; 
+c = cos(figTiltRad); 
+s = sin(figTiltRad); 
+ox = sizeIm(2)/2; % origin x 
+oy = sizeIm(1)/2; % origin y 
+% read on matrix transforms... probably more elegant.. 
+figCoordTilt = [(figCoord(1)-ox)*c - (figCoord(2)-oy)*s + ox, (figCoord(2)-oy)*c + (figCoord(1)-ox)*s + oy,...
+    (figCoord(3)-ox)*c - (figCoord(4)-oy)*s + ox, (figCoord(4)-oy)*c + (figCoord(3)-ox)*s + oy,...
+    (figCoord(5)-ox)*c - (figCoord(6)-oy)*s + ox, (figCoord(6)-oy)*c + (figCoord(5)-ox)*s + oy,...
+    (figCoord(7)-ox)*c - (figCoord(8)-oy)*s + ox, (figCoord(8)-oy)*c + (figCoord(7)-ox)*s + oy]; 
+aperture = insertShape(im,'FilledPolygon',figCoordTilt,'Color','black'); 
+aperture = sum(aperture,3); 
+aperture(aperture~=3) = 0; 
 
 %% combine fig + ground 
-if figGrating
-    fgIm = imfuse(bg,fig,'blend');
-    fgIm = double(fgIm)/255; 
-    fgIm(~logical(ap)) = 1; 
-else
-    fgIm = bg; 
-    fgIm(logical(ap)) = figAp(logical(ap)); 
+% if figGrating
+%     fgIm = imfuse(bg,fig,'blend');
+%     fgIm = double(fgIm)/255; 
+%     fgIm(~logical(ap)) = 1; 
+% else
+%     fgIm = bg; 
+%     fgIm(logical(ap)) = figAp(logical(ap)); 
+% end
+fgIm = bg; 
+fgIm(~logical(aperture)) = fig(~logical(aperture)); 
 end
+%% circular aperture on combined fig + ground 
+[fgIm, ap] = twcf_aperture(fgIm, apertureEdgeType, min(sizeIm)/2, 0); % cutout figure shape 
+fgIm(fgIm~=0)=1; 
 
 %% show final image 
 figure
-imshow(fgIm)
-titleText = sprintf('FG_lineLength%d_density%d_gratingAngle%d',lineLength,nLines,tiltDegrees); 
-title(sprintf('line length: %d; nLines: %d; line angle: %d, grating angle: %d',lineLength,nLines,lineAngle,tiltDegrees),...
+imshow(fgIm);
+titleText = sprintf('FG_lineLength%d_angle%d_figAngle%d_contrast%0.1f_fig%d',lineLength,lineAngle,figTilt,imContrast,isFig); 
+titleText = {strrep(titleText,'.','')}; 
+title(sprintf('line length: %d; line angle: %d, fig angle: %d, contrast: %0.1f',lineLength,lineAngle,figTilt,imContrast),...
     'FontSize', 14)
+fH = sort(double(findobj(0,'Type','figure')));
+figDir = sprintf('%s/figs/test/contrast%d_lineLength%d',pwd,imContrast*100,lineLength); 
+if ~exist(figDir,'dir')
+    mkdir(figDir)
+end
 if saveFig 
-    print(gcf,'-dpng','-painters',sprintf('%s/figs/%s.png',pwd,titleText))
+    % export_fig(f,'-dpng','-painters',sprintf('%s/figs/test/%s.png',pwd,titleText))
+    rd_saveAllFigs(fH, titleText, [], figDir, [])
 end
