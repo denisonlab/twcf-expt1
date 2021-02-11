@@ -23,9 +23,18 @@ tiltDegrees = 30;
 phase = 0;
 contrast = 1;
 ```
+*** 
 
-Sample stimuli
+Sample stimuli 
+![FG stimuli sample grating](figs/testStim.jpg)
+
+Sample display
+![FG stimuli sample display](figs/sample_display.jpg)
+
+*** 
+
+Sample stimuli (old version)
 ![FG stimuli sample](figs/fgStimSample.jpg)
 
-Sample grating stimuli
+Sample grating stimuli (old version)
 ![FG stimuli sample grating](figs/fgStimSampleGrating.jpg)
