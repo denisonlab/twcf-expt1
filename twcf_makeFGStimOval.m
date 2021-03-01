@@ -1,34 +1,32 @@
-function [fgIm] = twcf_makeFGStimOval(lineLength,theta,isFig)
+function [fgIm,randSeed] = twcf_makeFGStimOval(lineLength,theta,isFig,sizeOval)
 
-% function [fgIm] = twcf_makeFGStim(lineLength,lineAngle,figTilt,imContrast)
+% function [fgIm,randSeed] = twcf_makeFGStimOval(lineLength,theta,isFig)
 % 
 % Generates figure ground stimuli (Lamme) for TWCF expt 1. 
 % 
 % INPUTS
-%   lineLength (default 100)
-%   lineAngle (angle degrees of bg lines) 
-%   figTilt (angle degrees of square tilt) 
-%   imContrast (overall image contrast [0 to 1]
-%   isFig (1=figure+, 0=figure-)
+%   lineLength: default 100
+%   theta: rotation of ellipse 
+%   isFig: 1 = figure+, 0 = figure-
+%   sizeOval: [width radius, height radius] in pixels, default [300/2 600/2]
 % 
 % OUTPUTS 
 %   fgIm: figure ground image matrix 
+%   randSeed: random seed texture lines 
 %
 % Febraury 2021 
 % Karen Tian
 
 %% params 
-saveFig = 1; % save fig to directory 
+saveFig = 0; % save fig to directory 
 
 % ground 
 pixelsPerDegree = 99; 
 sizeIm = [1000 1000]; % size of image 
-lineWidth = 3; % width of texture lines
-% theta = 0; % line angle bg 
-imContrast = 0.4; % proportion of screen in black 
+lineWidth = 1; % width of texture lines
+imContrast = 0.3; % proportion of screen in black 
 
 % figure 
-sizeOval = [300/2 600/2]; % oval [width radius, height radius] 
 apertureEdgeType = 'square'; %  determines aperture edge, square=hard edge 
 
 %% checks 
@@ -36,9 +34,11 @@ apertureEdgeType = 'square'; %  determines aperture edge, square=hard edge
 if nargin==0
     lineLength = 60; % length of texture lines
 elseif nargin<1
-    theta = 0; % angle (degrees) of texture lines, scalar 
+    theta = 45; % angle (degrees) of texture lines
 elseif nargin<2
     isFig = 1; % 1=figure+, 0=figure-
+elseif nargin<3
+    sizeOval = [300/2 600/2]; % oval [width radius, height radius] 
 end
 if max(sizeOval) > min(sizeIm) 
     error('figure size must be less than image size')
@@ -54,15 +54,14 @@ areaIm = sizeIm(1)*sizeIm(2);
 blackPerLine = lineLength*lineWidth; 
 totalBlack = areaIm*imContrast; 
 nLines = round(totalBlack/blackPerLine); 
-lineAngle = 90; 
-if lineAngle == 90 
-    bgSlope = 1;
-    figSlope = 0; 
-end
+bgSlope = 1;
+figSlope = 0;
 
 %% draw bg lines canonical 90deg 
+
 randX = randi([1-lineLength/2,sizeIm(2)+lineLength/2],1,nLines)'; % randomly generate line middle points
 randY = randi([1-lineLength/2,sizeIm(1)+lineLength/2],1,nLines)';
+randSeed = rng; % EDIT seed 
 
 % randX = randperm(sizeIm(2),nLines);
 x = cat(2, randX, randX);
@@ -73,27 +72,23 @@ bg = insertShape(im,'Line',[x(:,1) y(:,1) x(:,2) y(:,2)],'LineWidth',lineWidth,'
 bg = rgb2gray(bg);
 bg(bg~=1) = 0;
 
-%% rotate bg lines 
-bgRotate = imrotate(bg,theta,'nearest','crop'); 
-Mrotate = ~imrotate(true(size(bg)),theta,'crop');
-bgRotate(Mrotate) = 0.5;
-
 %% FIGURE 
 if isFig == 0
-    fgIm = bgRotate;
+    fgIm = bg;
 else
     %% draw fig lines, orthogonal to bg 
-    fig = bgRotate; 
-    fig = imrotate(bgRotate,90,'nearest'); 
+    fig = bg; 
+    fig = imrotate(bg,90,'nearest'); 
     
     %% draw oval 
     %% add jitter! to oval origin 
     [imColumns, imRows] = meshgrid(1:size(fig,1), 1:size(fig,2)); % meshgrid 
     oval = (imRows - round(size(fig,2)/2)).^2 ./ sizeOval(2)^2 ...
         + (imColumns - round(size(fig,1)/2)).^2 ./ sizeOval(1)^2 <= 1; % logical oval 
+    oval = imrotate(oval,theta,'crop'); 
     
     %% combine figure oval and bg 
-    fgIm = bgRotate; 
+    fgIm = bg; 
     fgIm(oval) = fig(oval);    
 end
 
